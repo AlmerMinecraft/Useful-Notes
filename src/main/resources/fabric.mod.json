@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "useful-notes",
+	"version": "${version}",
+	"name": "Useful Notes",
+	"description": "This is a test mod, in which I try to learn, how to make client mods.",
+	"authors": [
+		"Almer"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/useful-notes/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.almer.useful_notes.UsefulNotes"
+		],
+		"client": [
+			"net.almer.useful_notes.UsefulNotesClient"
+		]
+	},
+	"mixins": [
+		"useful-notes.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.3",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
