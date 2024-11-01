@@ -13,7 +13,11 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -25,11 +29,27 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class DraggablePanel extends ClickableWidget {
+    private static final Identifier SELECTED_TEXTURE = Identifier.of(UsefulNotes.MOD_ID, "textures/gui/sprites/selection.png");
     private int x, y, width, height, deltaX, deltaY, edge;
     private List<ClickableWidget> widgets = new ArrayList<>();
     private Map<ClickableWidget, float[]> originalCoordinates = new HashMap<>();
     public boolean visible;
     public int count;
+    public int color = 0;
+    private static final List<String> colorTexture = new ArrayList<>();
+    public String id;
+
+    static {
+        colorTexture.add("white_note");
+        colorTexture.add("light_gray_note");
+        colorTexture.add("gray_note");
+        colorTexture.add("red_note");
+        colorTexture.add("light_red_note");
+        colorTexture.add("blue_note");
+        colorTexture.add("green_note");
+        colorTexture.add("yellow_note");
+        colorTexture.add("light_yellow_note");
+    }
     private TextWidget textWidget = new TextWidget(40,20,Text.literal("sefsef"),MinecraftClient.getInstance().textRenderer);
     // В другом моем моде это отвечало за изменение размера панели
     private boolean ctrl = false;
@@ -207,10 +227,18 @@ public class DraggablePanel extends ClickableWidget {
         for(ClickableWidget widget : widgets){
             widget.render(context, mouseX, mouseY, delta);
         }
-        context.drawTexture(Identifier.of(UsefulNotes.MOD_ID,"textures/gui/sprites/white_note.png"),x,y,0,0,width,height,width,height);
+        context.drawTexture(Identifier.of(UsefulNotes.MOD_ID,"textures/gui/sprites/" + colorTexture.get(color) + ".png"),x,y,0,0,width,height,width,height);
         textWidget.setPosition(x,y + this.height - textWidget.getHeight());
         textWidget.setMessage(Text.literal(String.valueOf(count)));
         textWidget.renderWidget(context, mouseX, mouseY, delta);
+        if(((NoteSettingScreen) MinecraftClient.getInstance().currentScreen).selectedNote == this){
+            context.drawTexture(SELECTED_TEXTURE,x,y,0,0,width,height,width,height);
+        }
+        if(id != null) {
+            context.drawItemWithoutEntity(new ItemStack(Registries.ITEM.get(Identifier.of(id))),x + 5,y + 5);
+        }
     }
-
+    public void getNextColor() {
+        color = (color + 1) % colorTexture.size();
+    }
 }

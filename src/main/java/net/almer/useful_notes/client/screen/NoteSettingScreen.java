@@ -33,8 +33,7 @@ public class NoteSettingScreen extends Screen {
     private final List<DraggablePanel> notes = new ArrayList<>();
     public DraggablePanel selectedNote;
     private TextIconButtonWidget itemChoose = TextIconButtonWidget.builder(Text.literal("📦"), (button) -> {
-        this.client.setScreen((Screen)null);
-        this.client.mouse.lockCursor();
+        MinecraftClient.getInstance().setScreen(new ItemSelectionScreen());
     }, true).width(20).texture(Identifier.of(UsefulNotes.MOD_ID, "icon/item_choose"), 16, 16).build();
     private final ButtonWidget plus = ButtonWidget.builder(Text.literal("+")
             , (button) -> {
@@ -48,7 +47,7 @@ public class NoteSettingScreen extends Screen {
         }
     }).width(20).build();
     private ButtonWidget color = ButtonWidget.builder(Text.of("color"), (button) -> {
-
+        selectedNote.getNextColor();
     }).width(20).build();
     private TextIconButtonWidget remove = TextIconButtonWidget.builder(RETURN_TO_GAME_TEXT, (button) -> {
                 for(ClickableWidget widget : selectedNote.getWidgets()){
