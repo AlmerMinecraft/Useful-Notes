@@ -1,21 +1,27 @@
 package net.almer.useful_notes.client.screen;
 
+import net.almer.useful_notes.client.widget.DraggablePanel;
+import net.almer.useful_notes.yaml.Note;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.Colors;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static net.almer.useful_notes.client.screen.NoteSettingScreen.NOTES_FILE_PATH;
 
 public class ItemSelectionScreen extends Screen {
     private final List<Item> items;
@@ -57,7 +63,28 @@ public class ItemSelectionScreen extends Screen {
             ItemWidget itemWidget = new ItemWidget(item, x, y, itemSize, itemSize) {
                 @Override
                 public void onClick(double mouseX, double mouseY) {
-                    System.out.println("Selected item: " + item.getName().getString());
+                    Yaml yaml = new Yaml();
+
+                    try (InputStream inputStream = new FileInputStream(NOTES_FILE_PATH)) {
+                        List<Note> loadedNotes = yaml.loadAs(inputStream, List.class);
+                        if (loadedNotes == null) {
+                            return;
+                        }
+
+                        for (Note note : loadedNotes) {
+                            if (note.isSelected()) {
+                                note.setItem(Registries.ITEM.getId(item).getPath());
+                                break;
+                            }
+                        }
+                        try (PrintWriter writer = new PrintWriter(new FileWriter(NOTES_FILE_PATH))) {
+                            yaml.dump(loadedNotes, writer);
+                        }
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    MinecraftClient.getInstance().setScreen(new NoteSettingScreen(Text.empty()));
                 }
             };
             itemWidget.setTooltip(Tooltip.of(item.getName()));
@@ -71,11 +98,10 @@ public class ItemSelectionScreen extends Screen {
             }
         }
     }
-
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
-        context.drawText(this.textRenderer, "Select an Item", this.width / 2 - 50, 30, 255, true);
+        context.drawText(this.textRenderer, "Select an Item", this.width / 2 - 50, 30, Colors.WHITE, true);
         searchField.render(context, mouseX, mouseY, delta);
     }
 

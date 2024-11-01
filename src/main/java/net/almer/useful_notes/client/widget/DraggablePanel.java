@@ -84,6 +84,20 @@ public class DraggablePanel extends ClickableWidget {
             add(widget);
         }
     }
+    public void setItem(String id){
+        this.id = id;
+    }
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
+
+    public String getItem() {
+        return id;
+    }
 
     private void updateOriginalCoordinates(ClickableWidget widget) {
         int relativeX = widget.getX() - this.x;
