@@ -29,11 +29,25 @@ import net.minecraft.world.GameRules;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 @Environment(EnvType.CLIENT)
 public class NoteWidget extends ClickableWidget {
     private static final Identifier PATH = Identifier.of(UsefulNotes.MOD_ID, "textures/gui/sprites/");
     private static final Identifier SELECTED_TEXTURE = Identifier.of(UsefulNotes.MOD_ID, "textures/gui/sprites/selection.png");
+
+    private static final Map<Integer, String> COLOR_TEXTURE_MAP = Map.of(
+            Colors.WHITE, "white_note",
+            Colors.LIGHT_GRAY, "light_gray_note",
+            Colors.GRAY, "gray_note",
+            Colors.RED, "red_note",
+            Colors.LIGHT_RED, "light_red_note",
+            Colors.BLUE, "blue_note",
+            Colors.GREEN, "green_note",
+            Colors.YELLOW, "yellow_note",
+            Colors.LIGHT_YELLOW, "light_yellow_note"
+    );
+
     public int size;
     public int count = 0;
     private int xPos;
@@ -43,7 +57,9 @@ public class NoteWidget extends ClickableWidget {
     private boolean dragging = false;
     public boolean selected = false;
     public int color = Colors.WHITE;
-    private DefaultedList position = DefaultedList.ofSize(2, 0);
+    private int posX;
+    private int posY;
+
     public NoteWidget(int x, int y, int size, int color) {
         super(x, y, 12 * size, 16 * size, Text.literal(""));
         this.xPos = x;
@@ -53,87 +69,64 @@ public class NoteWidget extends ClickableWidget {
         this.textureHeight = 16 * size;
         this.color = color;
     }
+
     @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        if(this.color == Colors.WHITE) {
-            context.drawTexture(PATH.withSuffixedPath("white_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
+        String textureName = COLOR_TEXTURE_MAP.getOrDefault(this.color, "white_note");
+        Identifier texture = PATH.withSuffixedPath(textureName + ".png");
+
+        context.drawTexture(texture, this.xPos, this.yPos, this.textureWidth, this.textureHeight, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
+
+        if (this.selected) {
+            context.drawTexture(SELECTED_TEXTURE, this.xPos, this.yPos, this.textureWidth, this.textureHeight, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
         }
-        else if(this.color == Colors.LIGHT_GRAY) {
-            context.drawTexture(PATH.withSuffixedPath("light_gray_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else if(this.color == Colors.GRAY) {
-            context.drawTexture(PATH.withSuffixedPath("gray_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else if(this.color == Colors.RED) {
-            context.drawTexture(PATH.withSuffixedPath("red_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else if(this.color == Colors.LIGHT_RED) {
-            context.drawTexture(PATH.withSuffixedPath("light_red_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else if(this.color == Colors.BLUE) {
-            context.drawTexture(PATH.withSuffixedPath("blue_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else if(this.color == Colors.GREEN) {
-            context.drawTexture(PATH.withSuffixedPath("green_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else if(this.color == Colors.YELLOW) {
-            context.drawTexture(PATH.withSuffixedPath("yellow_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else if(this.color == Colors.LIGHT_YELLOW) {
-            context.drawTexture(PATH.withSuffixedPath("light_yellow_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        else{
-            context.drawTexture(PATH.withSuffixedPath("white_note").withSuffixedPath(".png"), this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        if(this.selected){
-            context.drawTexture(SELECTED_TEXTURE, this.xPos, this.yPos, 12 * size, 16 * size, 0, 0, this.getWidth(), this.getHeight(), this.textureWidth, this.textureHeight);
-        }
-        TextWidget countText = new TextWidget(this.xPos, this.yPos + 12 * size, 12 * size, size, Text.literal(Integer.toString(this.count)), MinecraftClient.getInstance().textRenderer);
-        countText.renderWidget(context, mouseX, mouseY, delta);
+
+        context.drawText(MinecraftClient.getInstance().textRenderer, Text.literal(Integer.toString(this.count)), this.xPos, this.yPos + 12 * size, 12 * size, true);
     }
+
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-    }
-    public int getX(){
-        return this.xPos;
-    }
-    public int getY(){
-        return this.yPos;
-    }
+    protected void appendClickableNarrations(NarrationMessageBuilder builder) {}
+
+    public int getX() { return this.xPos; }
+    public int getY() { return this.yPos; }
+    int i = 0;
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if(button == 0 && this.visible){
-            if(this.clickInNote(mouseX, mouseY)) {
-                this.dragging = true;
-                ((NoteSettingScreen)MinecraftClient.getInstance().currentScreen).selected = this;
-                this.selected = true;
-                this.position.set(0, (int)mouseX - this.xPos);
-                this.position.set(1, (int)mouseY - this.yPos);
-                return true;
-            }
-            else{
-                this.selected = false;
-            }
+        if (button == 0 && this.visible && this.clickInNote(mouseX, mouseY)) {
+            this.dragging = true;
+//            ((NoteSettingScreen) MinecraftClient.getInstance().currentScreen).selected = this;
+            this.selected = true;
+            posX = (int) mouseX - this.xPos;
+            posY = (int) mouseY - this.yPos;
+            return true;
         }
+        this.selected = false;
         return super.mouseClicked(mouseX, mouseY, button);
     }
+
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if(button == 0) {
+        if (button == 0) {
+            System.out.println(i);
+            i++;
             this.dragging = false;
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
+
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if(this.dragging){
-            this.xPos = ((int)mouseX - ((int)this.position.get(0)));
-            this.yPos = ((int)mouseY - ((int)this.position.get(1)));
+        if (this.dragging) {
+            int newXPos = (int) mouseX - posX;
+            int newYPos = (int) mouseY - posY;
+            this.xPos = newXPos;
+            this.yPos = newYPos;
         }
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
-    private boolean clickInNote(double mouseX, double mouseY){
-        return mouseX >= this.getX() && mouseX < this.getX() + 12 * size
-                && mouseY >= this.getY() && mouseY < this.getY() + 16 * size;
+
+    private boolean clickInNote(double mouseX, double mouseY) {
+        return mouseX >= this.getX() && mouseX < this.getX() + this.textureWidth &&
+                mouseY >= this.getY() && mouseY < this.getY() + this.textureHeight;
     }
 }

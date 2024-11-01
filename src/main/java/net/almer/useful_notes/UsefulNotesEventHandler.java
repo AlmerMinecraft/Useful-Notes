@@ -11,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.collection.DefaultedList;
 import org.lwjgl.glfw.GLFW;
@@ -46,7 +47,7 @@ public class UsefulNotesEventHandler {
     private static void onClientTick(MinecraftClient client){
         if(client.world == null || client.player == null) return;
         if(OPEN_SETTINGS_KEY.wasPressed() && client.currentScreen == null){
-            client.setScreen(new NoteSettingScreen(true));
+            client.setScreen(new NoteSettingScreen(Text.empty()));
         }
     }
     public static void setNotes(DefaultedList<NoteWidget> note){
